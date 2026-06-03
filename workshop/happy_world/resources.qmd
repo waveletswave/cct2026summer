@@ -1,0 +1,17 @@
+---
+title: "Shiny Resources"
+format: html
+editor: visual
+---
+
+## Mastering Shiny
+
+https://mastering-shiny.org/basic-app.html
+
+## Shiny gallery
+
+https://shiny.posit.co/r/gallery/
+
+## ggiraph
+
+https://albert-rapp.de/posts/ggplot2-tips/17_ggiraph/17_ggiraph.html
