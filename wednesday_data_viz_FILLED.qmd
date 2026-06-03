@@ -1,0 +1,267 @@
+---
+title: "Data Visualization - CCT Fellowship Workshop 2026"
+format: html
+editor: Y.Song
+---
+
+```{r}
+#| label: load_package
+#| include: false
+
+# install.packages("tidyverse")
+# install.packages("patchwork")
+# install.packages("ggrepel")
+# install.packages("fontawesome")  # only needed when you Render (title icon)
+library(tidyverse)
+library(patchwork)
+library(ggrepel)
+library(fontawesome)
+```
+
+## Visualizing the World Happiness Report `r fa("globe-europe")`
+
+In this exercise, you will apply what you've learned in class to perform exploratory data analysis (EDA) on the **World Happiness Report**
+
+This dataset was downloaded from the website [Kaggle](https://www.kaggle.com/ajaypalsinghlo/world-happiness-report-2021?select=world-happiness-report.csv). We will use the **2021** data in this exercise. This dataset is stored in an object called `happy_full`
+
+Run the code in the code chunk below to import the necessary datasets - `happy_full` and `happy_select`
+
+```{r}
+#| label: import-data
+#| message: false
+
+# This CSV lives in the happy_world subfolder, and its columns are already
+# tidy (snake_case), so no clean_names() is needed.
+happy_full <- read_csv("happy_world/happy_select.csv")
+
+# Rename country_name -> country so the later label plot can use `country`.
+# (region / ladder_score / logged_gdp_per_capita already have good names.)
+happy_select <- happy_full |>
+  select(
+    country = country_name,
+    region,
+    ladder_score,
+    logged_gdp_per_capita,
+    social_support,
+    healthy_life_expectancy,
+    freedom = freedom_to_make_life_choices,
+    generosity,
+    corruption = perceptions_of_corruption
+  )
+```
+
+After reading data into R, the first thing I always like to do is take a look at the dataframe. In a really large dataset, this can sometimes be more helpful than just opening the file itself.
+
+```{r}
+#| label: glimpse-data
+
+# glimpse() prints one row per column: name, type, and the first few values.
+glimpse(happy_select)
+```
+
+## Basic section
+
+### Plotting distributions
+
+Let's begin by getting a sense of the overall distribution of `ladder_score` in the `happy_select` data frame.
+
+What type of geom do you think would be best to do this? (Hint: It can be useful to look at all the options at https://www.data-to-viz.com/ or https://r-graph-gallery.com/).
+
+Write out the code to create the figure here
+
+(There are several different ways you can accomplish this! Remember - this is a language, and there are many ways to construct a sentence. Try to use whatever feels most natural! If you're having trouble, try writing out in plain language what you'd like to do, step by step. Then work from there!)
+
+Hints: Try geom_histogram()!
+
+```{r}
+#| label: histogram
+
+ggplot(happy_select, aes(x = ladder_score)) +
+  geom_histogram(binwidth = 0.5, fill = "steelblue", colour = "white")
+```
+
+### Density by region
+
+What does the `ladder_score` distribution look like for each region? Again, there are many ways to visualize this. Let's first plot all the distributions together on one plot, in whatever type of plot makes most sense to you.
+
+Also plot the distributions using geom_boxplot().
+
+When looking into different types of plots, also think about what type would be most useful for your own data!
+
+```{r}
+#| label: density-and-box
+
+# All regions overlaid on one plot, using a semi-transparent density.
+ggplot(happy_select, aes(x = ladder_score, fill = region)) +
+  geom_density(alpha = 0.4)
+
+# The same comparison as a boxplot (region on the y-axis keeps labels readable).
+ggplot(happy_select, aes(x = ladder_score, y = region, fill = region)) +
+  geom_boxplot() +
+  theme(legend.position = "none")
+```
+
+### Faceting
+
+Let's consider an alternative way to plot the distributions without putting it all on one plot. Go ahead and use the `facet_wrap()` function to make multiple density plots. (Hint: you can run `?facet_wrap` in the console or search facet_wrap within the help tab in the bottom right panel of RStudio).
+
+Bonus: Remove the color legend.
+
+```{r}
+#| label: facet-density
+
+ggplot(happy_select, aes(x = ladder_score, fill = region)) +
+  geom_density(alpha = 0.6) +
+  facet_wrap(~ region) +
+  theme(legend.position = "none")   # bonus: the facet titles already label them
+```
+
+### Are rich countries "happier"?
+
+We can use scatterplots to visualize the relationship between two variables. For example, let's take a look at the relationship between `ladder_score` and `logged_gdp_per_capita`.
+
+```{r}
+#| label: scatter
+
+ggplot(happy_select, aes(x = logged_gdp_per_capita, y = ladder_score)) +
+  geom_point()
+```
+
+Emphasizing relationships:
+
+It's clear from the previous scatterplot that relationship between `ladder_score` and `logged_gdp_per_capita` is positive, and it looks pretty linear. To highlight this, we can use the `geom_smooth()` geom (remember to set the `se` argument to equal `FALSE` to just get a straight line - for now!).
+
+```{r}
+#| label: scatter-smooth
+
+ggplot(happy_select, aes(x = logged_gdp_per_capita, y = ladder_score)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)   # method = "lm" = straight line
+```
+
+### Making things cuter!
+
+The plots we've made, while nice, look a little...lame. Let's try to make some improvements. We'll use the last plot.
+
+Add a title, subtitle, x-axis label, and y-axis label. Also change the overall look of the plot using your favorite `theme_*()` function.
+
+```{r}
+#| label: scatter-pretty
+
+ggplot(happy_select, aes(x = logged_gdp_per_capita, y = ladder_score)) +
+  geom_point(colour = "grey40") +
+  geom_smooth(method = "lm", se = FALSE, colour = "firebrick") +
+  labs(
+    title    = "Wealthier countries report higher life satisfaction",
+    subtitle = "World Happiness Report, 2021",
+    x        = "Logged GDP per capita",
+    y        = "Ladder score (life satisfaction)"
+  ) +
+  theme_minimal()
+```
+
+Add country name labels to each of the points.
+
+```{r}
+#| label: scatter-labels
+#| warning: false
+
+# geom_text_repel() nudges labels apart so they don't overlap. With ~150
+# countries it will quietly skip the most crowded ones (raise max.overlaps
+# if you want more labels).
+ggplot(happy_select,
+       aes(x = logged_gdp_per_capita, y = ladder_score, label = country)) +
+  geom_point(colour = "grey40") +
+  geom_smooth(method = "lm", se = FALSE, colour = "firebrick") +
+  geom_text_repel(size = 2.5, max.overlaps = 12) +
+  labs(
+    title = "Wealthier countries report higher life satisfaction",
+    subtitle = "World Happiness Report, 2021",
+    x = "Logged GDP per capita",
+    y = "Ladder score"
+  ) +
+  theme_minimal()
+```
+
+### Making figure panels
+
+Pick your two favorite plots from today and assign the code for each to the following two objects - basic_plot_one basic_plot_two
+
+Create two figure panels - - One with the plots arranged side-by-side - And one with the plots arranged one on top of the other - Bonus: Fix the aesthetics of the plots if you like!
+
+```{r}
+#| label: figure-panels
+
+basic_plot_one <- ggplot(happy_select, aes(x = ladder_score, fill = region)) +
+  geom_density(alpha = 0.6) +
+  facet_wrap(~ region, labeller = label_wrap_gen(width = 18)) +
+  theme(legend.position = "none") +
+  labs(x = "Ladder score", y = "Density")
+
+basic_plot_two <- ggplot(happy_select,
+       aes(x = logged_gdp_per_capita, y = ladder_score)) +
+  geom_point(colour = "grey40") +
+  geom_smooth(method = "lm", se = FALSE, colour = "firebrick") +
+  labs(x = "Logged GDP per capita", y = "Ladder score") +
+  theme_minimal()
+
+# patchwork uses + (or |) for side-by-side, and / for stacked.
+basic_plot_one + basic_plot_two      # side-by-side
+basic_plot_one / basic_plot_two      # one on top of the other
+```
+
+### Finally, save your plot.
+
+```{r}
+#| label: save-plot
+
+ggsave("happiness_panels.png",
+       plot = basic_plot_one + basic_plot_two,
+       width = 11, height = 5, dpi = 300)
+```
+
+## Additional challenging question!!
+
+The scatterplot we created earlier had a pretty linear relationship. But let's see if there's a nonlinear curve that fits better.
+
+Make the same plot as we made earlier, but with three different types of fitted lines/curves shown. Give each a different color when plotted on the scatterplot, and BONUS: add a color legend!
+
+```{r}
+#| label: multi-fit
+#| warning: false
+
+# Trick for the legend: map colour to a *label string* INSIDE each geom_smooth's
+# aes(). ggplot then treats them as three groups and builds a legend.
+ggplot(happy_select, aes(x = logged_gdp_per_capita, y = ladder_score)) +
+  geom_point(colour = "grey60", alpha = 0.6) +
+  geom_smooth(aes(colour = "Linear (lm)"),
+              method = "lm", se = FALSE) +
+  geom_smooth(aes(colour = "LOESS (local)"),
+              method = "loess", se = FALSE) +
+  geom_smooth(aes(colour = "Polynomial (degree 2)"),
+              method = "lm", formula = y ~ poly(x, 2), se = FALSE) +
+  scale_colour_manual(
+    name = "Fitted curve",
+    values = c("Linear (lm)"            = "#1b9e77",
+               "LOESS (local)"          = "#d95f02",
+               "Polynomial (degree 2)"  = "#7570b3")
+  ) +
+  labs(
+    title = "Three ways to fit the GDP-happiness relationship",
+    x = "Logged GDP per capita",
+    y = "Ladder score"
+  ) +
+  theme_minimal()
+```
+
+## Additional Resources
+
+There are so many features and aesthetics you can add and edit to create effective figures. While this customization is great to create exactly what you want, the options can be very overwhelming. Here are a few resources that I routinely reference when I am making plots.
+
+- The Data Visualisation and Graphics for Communication chapters in R for Data Science (https://r4ds.had.co.nz/).
+
+- The R Graphics Cookbook by Winston Chang (https://r-graphics.org/)
+
+- ggplot2: Elegant Graphics for Data Analysis (3e) (https://ggplot2-book.org/). - particularly the Arranging Plots chapter if you want to make multi-panel figures!
+
+- More often than not, I end up googling a specific question. For the example above, labeling the scatterplot points with country name, I just searched "ggplot labeling points".

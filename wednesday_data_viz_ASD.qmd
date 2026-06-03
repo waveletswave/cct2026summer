@@ -1,0 +1,145 @@
+---
+title: "Data Visualization - CCT Fellowship Workshop 2026"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: load_package
+#| include: false
+
+# install.packages("tidyverse")
+# install.packages("patchwork")
+# install.packages("ggrepel")
+library(tidyverse)
+library(patchwork)
+library(ggrepel)
+```
+
+## Visualizing the World Happiness Report `r fa("globe-europe")`
+
+In this exercise, you will apply what you've learned in class to perform exploratory data analysis (EDA) on the **World Happiness Report**
+
+This dataset was downloaded from the website [Kaggle](https://www.kaggle.com/ajaypalsinghlo/world-happiness-report-2021?select=world-happiness-report.csv). We will use the **2021** data in this exercise. This dataset is stored in an object called `happy_full`
+
+Run the code in the code chunk below to import the necessary datasets - `happy_full` and `happy_select`
+
+```{r}
+
+```
+
+After reading data into R, the first thing I always like to do is take a look at the dataframe. In a really large dataset, this can sometimes be more helpful than just opening the file itself.
+
+```{r}
+
+```
+
+## Basic section
+
+### Plotting distributions
+
+Let's begin by getting a sense of the overall distribution of `ladder_score` in the `happy_select` data frame.
+
+What type of geom do you think would be best to do this? (Hint: It can be useful to look at all the options at https://www.data-to-viz.com/ or https://r-graph-gallery.com/).
+
+Write out the code to create the figure here
+
+(There are several different ways you can accomplish this! Remember - this is a language, and there are many ways to construct a sentence. Try to use whatever feels most natural! If you're having trouble, try writing out in plain language what you'd like to do, step by step. Then work from there!)
+
+Hints: Try geom_histogram()!
+
+```{r}
+
+```
+
+### Density by region
+
+What does the `ladder_score` distribution look like for each region? Again, there are many ways to visualize this. Let's first plot all the distributions together on one plot, in whatever type of plot makes most sense to you.
+
+Also plot the distributions using geom_boxplot().
+
+When looking into different types of plots, also think about what type would be most useful for your own data!
+
+```{r}
+
+```
+
+### Faceting
+
+Let's consider an alternative way to plot the distributions without putting it all on one plot. Go ahead and use the `facet_wrap()` function to make multiple density plots. (Hint: you can run `?facet_wrap` in the console or search facet_wrap within the help tab in the bottom right panel of RStudio).
+
+Bonus: Remove the color legend.
+
+```{r}
+
+```
+
+### Are rich countries "happier"?
+
+We can use scatterplots to visualize the relationship between two variables. For example, let's take a look at the relationship between `ladder_score` and `logged_gdp_per_capita`.
+
+```{r}
+
+```
+
+Emphasizing relationships:
+
+It's clear from the previous scatterplot that relationship between `ladder_score` and `logged_gdp_per_capita` is positive, and it looks pretty linear. To highlight this, we can use the `geom_smooth()` geom (remember to set the `se` argument to equal `FALSE` to just get a straight line - for now!).
+
+```{r}
+
+```
+
+### Making things cuter!
+
+The plots we've made, while nice, look a little...lame. Let's try to make some improvements. We'll use the last plot.
+
+Add a title, subtitle, x-axis label, and y-axis label. Also change the overall look of the plot using your favorite `theme_*()` function.
+
+```{r}
+
+```
+
+Add country name labels to each of the points.
+
+```{r}
+
+```
+
+### Making figure panels
+
+Pick your two favorite plots from today and assign the code for each to the following two objects - basic_plot_one basic_plot_two
+
+Create two figure panels - - One with the plots arranged side-by-side - And one with the plots arranged one on top of the other - Bonus: Fix the aesthetics of the plots if you like!
+
+```{r}
+
+```
+
+### Finally, save your plot.
+
+```{r}
+
+```
+
+## Additional challenging question!!
+
+The scatterplot we created earlier had a pretty linear relationship. But let's see if there's a nonlinear curve that fits better.
+
+Make the same plot as we made earlier, but with three different types of fitted lines/curves shown. Give each a different color when plotted on the scatterplot, and BONUS: add a color legend!
+
+```{r}
+
+```
+
+## Additional Resources
+
+There are so many features and aesthetics you can add and edit to create effective figures. While this customization is great to create exactly what you want, the options can be very overwhelming. Here are a few resources that I routinely reference when I am making plots.
+
+- The Data Visualisation and Graphics for Communication chapters in R for Data Science (https://r4ds.had.co.nz/).
+
+- The R Graphics Cookbook by Winston Chang (https://r-graphics.org/)
+
+- ggplot2: Elegant Graphics for Data Analysis (3e) (https://ggplot2-book.org/). - particularly the Arranging Plots chapter if you want to make multi-panel figures!
+
+- More often than not, I end up googling a specific question. For the example above, labeling the scatterplot points with country name, I just searched "ggplot labeling points".
