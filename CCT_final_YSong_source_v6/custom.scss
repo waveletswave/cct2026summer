@@ -1,0 +1,144 @@
+/*-- scss:defaults --*/
+
+$presentation-heading-color: #012169;
+$link-color: #00539b;
+$presentation-h2-font-size: 1.30em;
+$presentation-font-size-root: 38px;
+$code-block-font-size: 0.55em;
+
+/*-- scss:rules --*/
+
+.reveal .footer {
+  font-size: 0.42em;
+  color: #898781;
+}
+
+.reveal .slide-number {
+  font-size: 0.55em;
+  color: #898781;
+}
+
+.reveal table {
+  font-size: 0.60em;
+  line-height: 1.35;
+}
+
+.reveal .small {
+  font-size: 0.72em;
+}
+
+.reveal .muted {
+  color: #52514e;
+}
+
+.reveal .punch {
+  color: #012169;
+  font-weight: 700;
+}
+
+/* dark terminal-style output blocks */
+.reveal .term pre code {
+  background: #1a1a19;
+  color: #d6d6cf;
+  border-radius: 6px;
+  padding: 0.7em 0.9em;
+}
+
+.reveal .subtitle {
+  color: #52514e;
+}
+
+.reveal h2 {
+  margin-bottom: 0.5em;
+}
+
+.reveal ul li,
+.reveal ol li {
+  margin-bottom: 0.28em;
+}
+
+/* v2 additions: badges, chips, cards */
+.reveal .chip {
+  display: inline-block;
+  border: 1.5px solid #c3c2b7;
+  border-radius: 999px;
+  padding: 0.10em 0.62em;
+  margin: 0.12em 0.1em;
+  font-size: 0.60em;
+  line-height: 1.5;
+}
+.reveal .chip.gen { color: #0a6b4f; border-color: #0a6b4f; background: #e9f7f1; }
+.reveal .chip.dhs { color: #012169; border-color: #012169; background: #e8edf8; }
+.reveal .qcard {
+  background: #f4f6fb;
+  border-left: 4px solid #2a78d6;
+  padding: 0.55em 1.0em;
+  border-radius: 6px;
+  font-style: italic;
+  color: #333;
+}
+.reveal .usecard {
+  border: 1.5px solid #e1e0d9;
+  border-radius: 10px;
+  padding: 0.45em 0.75em;
+  margin: 0.25em 0;
+  font-size: 0.68em;
+  line-height: 1.4;
+}
+.reveal .usecard b { color: #012169; }
+.reveal input[type=range] { accent-color: #2a78d6; }
+
+/* v4: overlay chips, validation strip, stat tiles, output trees */
+.reveal .ovl {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.90);
+  border: 1.5px solid #c3c2b7;
+  border-radius: 8px;
+  padding: 0.30em 0.70em;
+  font-size: 0.50em;
+  color: #0b0b0b;
+  line-height: 1.4;
+}
+.reveal .vstage {
+  border: 1.5px solid #0a6b4f;
+  background: #f2faf6;
+  border-radius: 8px;
+  padding: 0.45em 0.75em;
+  font-size: 0.62em;
+  text-align: center;
+  line-height: 1.35;
+}
+.reveal .vstage span { display: block; color: #52514e; font-size: 0.85em; }
+.reveal .vstage.doc { border-color: #b57d1e; background: #fdf6e8; }
+.reveal .vstage.doc em { display: block; color: #8a5f14; font-style: normal; font-size: 0.78em; }
+.reveal .stat { text-align: center; }
+.reveal .stat .n { font-size: 1.25em; font-weight: 700; color: #012169; line-height: 1.15; }
+.reveal .stat .l { font-size: 0.52em; color: #52514e; margin-top: 0.15em; }
+.reveal .tgen pre code { background: #f2faf6; border-left: 4px solid #0a6b4f; border-radius: 0 6px 6px 0; }
+.reveal .tdhs pre code { background: #eef2fa; border-left: 4px solid #012169; border-radius: 0 6px 6px 0; }
+
+.reveal .tgen pre code, .reveal .tdhs pre code { font-size: 1.32em; line-height: 1.55; }
+.reveal .vlabel { text-align: center; color: #898781; font-size: 0.55em; letter-spacing: 0.04em; margin: 0.9em 0 0.3em 0; }
+
+/* v5: repo card */
+.reveal .repocard {
+  border: 1.5px solid #c3c2b7;
+  border-radius: 10px;
+  padding: 0.6em 0.9em;
+  background: #fcfcfb;
+  font-size: 0.62em;
+  line-height: 1.5;
+}
+.reveal .repocard .rname { color: #012169; font-weight: 700; font-size: 1.05em; }
+.reveal .repocard .rmeta { color: #52514e; font-size: 0.85em; }
+.reveal .repocard code { font-size: 0.9em; }
+
+.reveal .cap {
+  background: #ffffff;
+  border: 1.5px solid #c3c2b7;
+  border-radius: 8px;
+  padding: 0.30em 0.70em;
+  font-size: 0.50em;
+  color: #0b0b0b;
+  line-height: 1.4;
+}

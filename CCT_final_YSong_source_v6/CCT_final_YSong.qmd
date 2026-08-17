@@ -1,0 +1,384 @@
+---
+title: "DHSVM Spatial & Stream Network Toolkit"
+subtitle: "*(that actually works)*, from a watershed boundary to stream networks and<br>a complete DHSVM input set"
+author: "Yiyun Song, ECS"
+date: 2026-08-17
+date-format: "MMMM D, YYYY"
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    width: 1280
+    height: 720
+    slide-number: c/t
+    footer: "github.com/waveletswave/DHSVM_Stream_Toolkit_ThatWorks"
+    transition: none
+    embed-resources: true
+    code-line-numbers: false
+    highlight-style: github
+---
+
+## What I built this summer
+
+<br>
+
+- **DHSVM**, the distributed hydrology model I use for post-fire watershed work, requires a demanding input set:\
+  [**gridded terrain binaries** · a **routed, ordered stream network** · **initial model states**]{.small}
+
+- This summer that preparation became a **toolkit**:\
+  [**one command**, from a **watershed boundary shapefile + DEM** to the complete input set]{.small}
+
+- Most outputs are **not DHSVM-specific**:\
+  [the **stream network** in particular serves many kinds of watershed analysis]{.small}
+
+::: notes
+About 30 seconds. Plain opening: what the model needs, what I built, and why the talk is framed around the toolkit rather than the model. At the midterm I covered the science, so today goes straight to the tool. The last sentence sets up the second half of the talk.
+:::
+
+## What the toolkit does {.smaller}
+
+```{=html}
+<div style="display:flex; flex-wrap:wrap; row-gap:16px; column-gap:10px; align-items:center; justify-content:center; font-size:0.70em; margin:0.4em 0 0.9em 0; line-height:1.25;">
+  <div style="border-radius:999px; background:#ffffff; border:2px solid #012169; color:#012169; font-weight:600; padding:0.5em 0.85em; text-align:center;">watershed boundary .shp<br>+ resolution</div>
+  <span style="color:#898781; font-size:1.2em;">&#8594;</span>
+  <div style="background:#f4f4f2; border:1.5px solid #c3c2b7; border-radius:8px; padding:0.5em 0.75em; text-align:center;">fetch + clip DEM<br><span style="color:#52514e;">USGS 3DEP</span></div>
+  <span style="color:#898781; font-size:1.2em;">&#8594;</span>
+  <div style="background:#f4f4f2; border:1.5px solid #c3c2b7; border-radius:8px; padding:0.5em 0.75em; text-align:center;">slope</div>
+  <span style="color:#898781; font-size:1.2em;">&#8594;</span>
+  <div style="background:#cde2fb; border:1.5px solid #2a78d6; border-radius:8px; padding:0.5em 0.75em; text-align:center;">flow direction +<br>accumulation</div>
+  <span style="color:#898781; font-size:1.2em;">&#8594;</span>
+  <div style="background:#cde2fb; border:1.5px solid #2a78d6; border-radius:8px; padding:0.5em 0.75em; text-align:center;">stream network<br>+ topology</div>
+  <div style="flex-basis:100%; height:0;"></div>
+  <span style="color:#898781; font-size:1.2em;">&#8594;</span>
+  <div style="background:#f4f4f2; border:1.5px solid #c3c2b7; border-radius:8px; padding:0.5em 0.75em; text-align:center;">soil depth</div>
+  <span style="color:#898781; font-size:1.2em;">&#8594;</span>
+  <div style="border-radius:8px; background:#f4f4f2; border:1.5px solid #c3c2b7; padding:0.5em 0.75em; text-align:center;">model-specific<br>writers</div>
+  <span style="color:#898781; font-size:1.2em;">&#8594;</span>
+  <div style="border-radius:999px; background:#012169; border:2px solid #012169; color:#ffffff; font-weight:600; padding:0.5em 0.9em; text-align:center;">your analysis<br>or model</div>
+</div>
+```
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**General outputs** (any model or analysis)
+
+::: {.tgen}
+```default
+elev_clipped.tif      clipped DEM
+slope_filled.tif      slope
+flow_acc.tif          flow accumulation
+flow_dir.tif          flow direction
+streamfile_attr.shp   network + attributes
+quicklook.png         review figure
+```
+:::
+:::
+
+::: {.column width="50%"}
+**DHSVM outputs** (a thin final stage)
+
+::: {.tdhs}
+```default
+DHSVM_input_binaries/  dem  mask  soil
+                       veg  soildepth  (.bin)
+DHSVM_input_streams/   stream.class.dat
+                       stream.network.dat
+                       stream.map.dat
+modelstate/            Interception  Snow
+                       Soil  Channel
+```
+:::
+:::
+
+::::
+
+. . .
+
+Setting up a new basin means setting a few environment variables. The pipeline runs without a GUI, so it batches on the cluster.
+
+::: notes
+About 55 seconds. This slide is the map of the talk. The left tree is the general half: standard GeoTIFFs and an attributed shapefile that R, Python, QGIS, and ArcGIS read directly. The right tree is the only part that speaks DHSVM's formats, and it is a thin final stage. The two highlighted boxes in the strip, flow and streams, are what the next four slides explain, with no GIS background assumed.
+:::
+
+---
+
+::: {.r-stack}
+![](assets/p1_a_grid.png){fig-align="center" height="640"}
+
+![](assets/p1_b_choice.png){.fragment fig-align="center" height="640"}
+
+![](assets/p1_c_arrows.png){.fragment fig-align="center" height="640"}
+:::
+
+::: notes
+About 40 seconds. A DEM is elevation numbers on a grid. [advance] Each cell compares itself with its eight neighbors and asks which one is steepest downhill. Diagonal neighbors are farther away, so the comparison uses drop per unit distance. [advance] Doing this everywhere gives every cell a pointer. This is called D8 flow direction. The toolkit's engine uses a multiple-direction variant on hillslopes, which spreads flow more realistically, but the idea is the same.
+:::
+
+---
+
+::: {.r-stack}
+![](assets/p2_a_terrain.png){fig-align="center" height="640"}
+
+![](assets/p2_b_rain.png){.fragment fig-align="center" height="640"}
+
+![](assets/p2_c_acc.png){.fragment fig-align="center" height="640"}
+:::
+
+::: notes
+About 45 seconds. This is a synthetic landscape, shown as a hillshade. [advance] Drop one unit of rain on every cell. [advance] Let each drop follow the arrows and count how many pass through each cell. That count is flow accumulation. Nobody drew these rivers; the valleys emerge from counting. A ridge cell has a count of one. The main channel collects thousands of cells.
+:::
+
+---
+
+```{=html}
+<div style="text-align:center;">
+  <div id="acstack">
+    <img class="acframe" src="assets/p3_sweep_0.png" style="display:block; margin:0 auto; height:580px;">
+    <img class="acframe" src="assets/p3_sweep_1.png" style="display:none; margin:0 auto; height:580px;">
+    <img class="acframe" src="assets/p3_sweep_2.png" style="display:none; margin:0 auto; height:580px;">
+    <img class="acframe" src="assets/p3_sweep_3.png" style="display:none; margin:0 auto; height:580px;">
+    <img class="acframe" src="assets/p3_sweep_4.png" style="display:none; margin:0 auto; height:580px;">
+    <img class="acframe" src="assets/p3_sweep_5.png" style="display:none; margin:0 auto; height:580px;">
+    <img class="acframe" src="assets/p3_sweep_6.png" style="display:none; margin:0 auto; height:580px;">
+    <img class="acframe" src="assets/p3_sweep_7.png" style="display:none; margin:0 auto; height:580px;">
+  </div>
+  <div style="display:flex; align-items:center; justify-content:center; gap:14px; margin-top:10px;">
+    <span style="font-size:0.5em; color:#52514e;">large A<sub>c</sub>, few streams</span>
+    <input type="range" min="0" max="7" value="0" style="width:46%;"
+      oninput="var f=document.querySelectorAll('#acstack .acframe'); for(var i=0;i<f.length;i++){f[i].style.display=(i==+this.value)?'block':'none';}">
+    <span style="font-size:0.5em; color:#52514e;">small A<sub>c</sub>, streams everywhere</span>
+  </div>
+</div>
+```
+
+::: notes
+About 50 seconds. One question remains: how many drops make a stream? The threshold is a support area, the amount of land that must drain into a cell before we call it a channel. [drag the slider slowly] With a large threshold only the trunk streams appear. As the threshold shrinks, channels climb up the hillslopes, and the drainage density in the corner changes by a factor of about two hundred. Every extraction tool asks for this number, and it is usually chosen by eye. The next slide shows how the toolkit chooses it instead. After dragging, click on an empty part of the slide so the arrow keys advance slides again.
+:::
+
+## Choosing the threshold objectively {.smaller}
+
+A network extracted from a DEM depends on one free parameter, the support area A~c~. The toolkit selects it with the constant stream drop test: in a properly extracted network, first-order streams show the same mean elevation drop as higher-order streams. The sweep takes the first sustained band where the test passes (|t| < 2).
+
+![](assets/ac_resolution_bands.png){.nostretch fig-align="center" width="72%"}
+
+Because A~c~ is a physical area, the same value remains valid when the grid changes from 28 m to 10 m. Holding the cell count fixed instead would give a network about eight times too dense at 10 m.
+
+::: notes
+About 50 seconds. Walk the figure. The blue bars are the thresholds the drop test accepts at the two resolutions, on the same basin. They overlap, and the chosen area, 60 cells at 28 m and 476 cells at 10 m, lies in the 28 m band and at the lower edge of the 10 m band. The red mark shows the alternative: keeping 60 cells at 10 m would put channel initiation at 0.006 square kilometers, which no part of the test accepts. The criterion is stated, physical, and repeatable, which is what a methods section needs.
+:::
+
+## From channel cells to a network {.smaller}
+
+:::: {.columns}
+
+::: {.column width="55%"}
+![](assets/p4_topology.png){height="540"}
+:::
+
+::: {.column width="45%"}
+Channel cells are vectorized into segments, directed downstream, ordered from headwaters to outlet, and connected to a single outlet. Each segment carries its length, slope, drainage area, and channel class.
+
+<br>
+
+This topology is what routing requires, in DHSVM or any other model. It also supports transport along the network, for temperature, sediment, or nutrients, and connectivity measures for stream ecology.
+
+<br>
+
+[Distance ties at junctions are resolved by a fixed rule, so the same boundary gives the same network in every run.]{.muted .small}
+:::
+
+::::
+
+::: notes
+About 45 seconds. A picture of streams is not yet something you can compute on. The toolkit builds a proper directed network, and the figure shows what the watershed itself means: every cell whose water reaches this outlet. The attribute table travels in a plain shapefile. One detail for the computationally minded: junction geometry can produce exact distance ties, and the toolkit resolves them with a fixed rule, so results are reproducible run to run.
+:::
+
+## Cleaning up the original workflow
+
+```{=html}
+<div style="display:flex; align-items:center; justify-content:center; gap:26px; margin-top:0.2em;">
+  <div style="display:flex; flex-direction:column; align-items:center; gap:10px; flex:0 0 auto;">
+    <img src="assets/wf_old-1.png" style="height:500px; display:block;">
+    <div class="cap">eight steps &middot; three format conversions &middot; GUI required</div>
+  </div>
+  <div class="fragment" style="font-size:2.4em; color:#012169; font-weight:700; flex:0 0 auto;">&#8594;</div>
+  <div class="fragment" style="display:flex; flex-direction:column; align-items:center; gap:10px; flex:0 0 auto;">
+    <div class="cap">one pipeline &middot; Python + GRASS &middot; headless on the cluster</div>
+    <img src="assets/wf_new-1.png" style="height:330px; display:block;">
+  </div>
+</div>
+```
+
+::: notes
+About 50 seconds. Start with the left figure alone: the original preparation for this basin, drawn for my course report. Eight executable steps across QGIS console scripts, a legacy format converter, and shell utilities, with three file-format conversions along the way. It required a GUI, so it could not run on the cluster. I do not expect anyone to read the boxes; the shape is the point. [advance] The toolkit replaces this with one orchestrated pipeline in Python and GRASS. The stages run in dependency order and stop at the first failure. The next slide shows this running on the cluster.
+:::
+
+## Running it on the Duke Compute Cluster {.smaller}
+
+:::: {.columns}
+
+::: {.column width="55%"}
+```bash
+ssh dcc                # dcc-login.oit.duke.edu
+git clone https://github.com/waveletswave/DHSVM_Stream_Toolkit_ThatWorks.git
+source /hpc/group/abmurraylab/ys451/env.sh
+   # Anaconda3, conda env dhsvm_geo, GRASS/7.6.0
+
+export DHSVM_EPSG=32617
+export DHSVM_WATERSHED=.../arwd_watershed_UTM17.shp
+export DHSVM_DEM_SOURCE=.../AR_src_3dep_10m.tif
+export DHSVM_OUT=/work/ys451/cct_demo/outputs_AR_10m
+export DHSVM_STREAM_SOURCE_AREA_M2=22000
+bash standalone_CA/pipeline/run_pipeline.sh
+```
+
+[This small basin runs in a login shell; production runs go inside a Slurm allocation.]{.muted style="font-size:0.5em;"}
+:::
+
+::: {.column width="45%"}
+```{=html}
+<div class="repocard">
+  <div class="rname">waveletswave / DHSVM_Stream_Toolkit_ThatWorks</div>
+  <div class="rmeta">public &middot; MIT license &middot; guides: NEW_WATERSHED_GUIDE &middot; DCC_SETUP</div>
+  <div style="margin-top:0.4em;">Terrain, stream network, and initial state inputs for DHSVM, from a watershed boundary and a DEM.</div>
+</div>
+```
+
+::: {.term}
+```
+>>> [1] DEM entry (general: prep_dem)
+    valid cells 22849 / 33231
+>>> [4] hydrology (GRASS chain)
+    22000.0 m2 / cell 100.00 m2 = 220 cells
+[stream_network] segments=67  outlets=1
+                 max_propagated_order=8
+PIPELINE COMPLETE -- DHSVM input set
+```
+:::
+
+[Recorded on dcc-login-05, August 16 (full session log in backup).]{.muted style="font-size:0.5em;"}
+:::
+
+::::
+
+::: notes
+About 45 seconds. This connects two of the fellowship's training days directly to the work. Left is the whole session, recorded last night: clone the public repository, source one environment file that loads Anaconda, the geo environment, and GRASS, set the variables, run one command. Right is the recorded output. One thing worth saying out loud: the same boundary, a fresh clone, two months after the June runs, returns the same network, 67 segments, one outlet, propagated order 8, the same class counts. That is what reproducibility means in practice. The link is in the footer, and I will put it in the Zoom chat. The next slide shows the quick-look this run wrote.
+:::
+
+## A real basin end to end: AR at 10 m {.smaller}
+
+![](assets/AR_10m_quicklook.png){.nostretch fig-align="center" height="545"}
+
+[The pipeline's quick-look for AR (Arrowwood), built from its boundary shapefile at 10 m.]{.muted style="font-size:0.55em; display:block; text-align:center;"}
+
+::: notes
+About 35 seconds. A real basin, run end to end; the quick-look is the last stage of the pipeline, and it exists so you inspect a new basin before you trust it. The extracted network sits in the valleys. Soil depth is deepest along the channels, as its model intends. Flow accumulation concentrates to the southern outlet.
+:::
+
+## The same watershed at 30 m {.smaller}
+
+![](assets/AR_30m_quicklook.png){.nostretch fig-align="center" height="545"}
+
+[Only the resolution variable changed.]{.muted style="font-size:0.55em; display:block; text-align:center;"}
+
+::: notes
+About 15 seconds. The same boundary shapefile at 30 m; one variable changed and nothing else. The channel-initiation threshold carries across because it is a physical area, as slide seven showed.
+:::
+
+## Validation {.smaller}
+
+Rebuilt against an audited reference implementation, with acceptance criteria fixed before porting: sha256 byte identity for the flat binaries, pixel-level equivalence for the rasters.
+
+```{=html}
+<div class="vlabel">STAGE BY STAGE, AGAINST THE REFERENCE</div>
+<div style="display:flex; flex-wrap:wrap; align-items:stretch; justify-content:center; gap:10px; margin:0.3em 0 0.5em 0;">
+  <div class="vstage"><b>clip</b><span>max |&Delta;| 0.0</span></div>
+  <div class="vstage"><b>slope</b><span>max |&Delta;| 0.0</span></div>
+  <div class="vstage"><b>base grids</b><span>sha256 identical</span></div>
+  <div class="vstage"><b>hydrology</b><span>max |&Delta;| 0.0</span></div>
+  <div class="vstage doc"><b>soil depth</b><span>1 float32 ULP</span><em>documented</em></div>
+  <div class="vstage doc"><b>stream network</b><span>2 junction ties</span><em>documented</em></div>
+  <div class="vstage"><b>model states</b><span>sha256 identical</span></div>
+</div>
+<div class="vlabel">END TO END</div>
+<div style="display:flex; justify-content:center; gap:72px; margin:0.4em 0 0.8em 0;">
+  <div class="stat"><div class="n">NSE 0.99999510</div><div class="l">hourly streamflow, 2016 to 2018,<br>standalone vs reference</div></div>
+  <div class="stat"><div class="n">PBIAS &minus;0.000059%</div><div class="l">same three years,<br>same comparison</div></div>
+  <div class="stat"><div class="n">identical</div><div class="l">skill scores against<br>observed streamflow</div></div>
+</div>
+```
+
+[The two amber stages are recorded in the validation log with cause and consequence: a math-library rounding difference of one bit, and one geometrically undefined tie resolved by the fixed rule.]{.muted .small}
+
+::: notes
+About 40 seconds. The habit worth taking away: decide what counts as the same before rewriting anything, separately for each output type. Binaries have no excuse, so the standard is byte identity. Rasters legitimately differ in their containers, so the standard is the pixels. Five stages are exact. The two amber ones could not be exact for reasons that are themselves instructive: one difference lives below the algorithm in the math library, and one is a genuinely undefined tie. Both are in the validation log. The bottom row is the end-to-end result.
+:::
+
+## Uses beyond DHSVM {.smaller}
+
+Everything upstream of the DHSVM writers is general. Uses I can see directly:
+
+:::: {.columns}
+
+::: {.column width="50%"}
+::: {.usecard}
+**Stream ecology and habitat.** Network distance, fragmentation, and connectivity, computed from the directed network and its attribute table.
+:::
+
+::: {.usecard}
+**Water quality and temperature.** A defined downstream order for routing along the channel network.
+:::
+:::
+
+::: {.column width="50%"}
+::: {.usecard}
+**Geomorphology and erosion.** Longitudinal profiles, knickpoints, and slope against drainage area from the same rasters.
+:::
+
+::: {.usecard}
+**Other hydrologic models.** The same terrain and stream products; only a small writer for the target format is needed.
+:::
+:::
+
+::::
+
+<br>
+
+The repository is public under an MIT license and includes a step-by-step guide for a new watershed. I am glad to help anyone who wants to try it on their own basin.
+
+::: notes
+About 50 seconds. This is why the talk spent its middle on principles rather than on DHSVM file formats. The general outputs are standard GeoTIFFs and a shapefile, so they drop into R, Python, or any GIS without conversion. Walk the four cards briefly. Close with the offer as stated on the slide.
+:::
+
+## Summary and thanks
+
+- **February**: scripts inside a **GUI**, on one machine, for one basin
+- **Now**: a documented, **validated pipeline**, from a **boundary shapefile** on the **cluster**; two basins, three resolutions, end to end
+- **From this fellowship**: **version control**, **validation** against a reference, **batch thinking**, and **floating-point care**
+
+. . .
+
+<br>
+[github.com/waveletswave/DHSVM_Stream_Toolkit_ThatWorks]{style="display:inline-block; font-family:Menlo,Consolas,'Source Code Pro',monospace; font-weight:600; color:#012169; background:#f4f4f2; border:1.5px solid #c3c2b7; border-radius:8px; padding:0.20em 0.65em; font-size:0.95em;"}
+
+. . .
+
+<br>
+Thank you: Akshay and the CCT, Brad Murray and the lab, and my fellow fellows. I will answer questions in the shared document.
+
+::: notes
+About 30 seconds. Close on the change since February and on where the practices came from, then thanks. Total target is about nine and a half minutes.
+:::
+
+## Backup: the consolidated orchestrator {visibility="uncounted" .smaller}
+
+![](assets/wf_new-1.png){.nostretch height="500" fig-align="center"}
+
+[An intermediate stage of the cleanup, drawn for my course report: one orchestrator, four modules, no GUI. The standalone pipeline in the repository descends from this design and removes the remaining QGIS dependency.]{.small .muted}
+
+::: notes
+Backup for questions about the migration path: original eight-step chain, then this consolidated orchestrator, then the fully standalone pipeline that the talk presented.
+:::
+
+{{< include assets/dcc_log_slide.qmd >}}
+

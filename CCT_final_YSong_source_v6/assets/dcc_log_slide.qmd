@@ -1,0 +1,369 @@
+## Backup: the full DCC session log {visibility="uncounted" .smaller}
+
+```{=html}
+<div style="border:1.5px solid #c3c2b7; border-radius:8px; background:#1a1a19; height:540px; overflow-y:auto; overflow-x:auto; padding:0.8em 1.0em;">
+<pre style="margin:0; background:transparent; border:none; box-shadow:none; overflow:visible;"><code style="background:transparent; color:#50fa7b; font-size:0.42em; line-height:1.45; white-space:pre; max-height:none; overflow:visible; display:block;">(dhsvm_geo) ys451@dcc-login-05  /work/ys451/cct_demo/DHSVM_Stream_Toolkit_ThatWorks $ export DHSVM_DEM_SOURCE=/wo
+ork/ys451/dhsvm_ca/standalone_dev/AR_src_3dep_10m.tif
+(dhsvm_geo) ys451@dcc-login-05  /work/ys451/cct_demo/DHSVM_Stream_Toolkit_ThatWorks $ export DHSVM_DEM_SOURCE=/work/ys451/dhsvm_ca/standalone_dev/AR_src_3dep_10m.tif
+
+(dhsvm_geo) ys451@dcc-login-05  /work/ys451/cct_demo/DHSVM_Stream_Toolkit_ThatWorks $ export DHSVM_STREAM_SOURCE_
+_AREA_M2=22000
+(dhsvm_geo) ys451@dcc-login-05  /work/ys451/cct_demo/DHSVM_Stream_Toolkit_ThatWorks $ export DHSVM_STREAM_SOURCE_AREA_M2=22000
+
+(dhsvm_geo) ys451@dcc-login-05  /work/ys451/cct_demo/DHSVM_Stream_Toolkit_ThatWorks $ bash standalone_CA/pipeline
+e/run_pipeline.sh
+(dhsvm_geo) ys451@dcc-login-05  /work/ys451/cct_demo/DHSVM_Stream_Toolkit_ThatWorks $ bash standalone_CA/pipeline/run_pipeline.sh
+
+==========================================================
+  STANDALONE DHSVM PREPROCESSING PIPELINE
+  OUT = /work/ys451/cct_demo/outputs_AR_10m
+==========================================================
+
+&gt;&gt;&gt; [1] DEM entry (general: prep_dem)
+    prep_dem /work/ys451/dhsvm_ca/standalone_dev/AR_src_3dep_10m.tif -&gt; elev_clipped.tif  (res 10 m)
+target: EPSG:32617  10.000 m  159 rows x 209 cols  (pad 0 cells)
+extent (EPSG:32617): (269800.0, 3895230.0, 271890.0, 3896820.0)
+source: EPSG:5070  351x309  res~(9.119545, 9.119545)  nodata=nan
+wrote /work/ys451/cct_demo/outputs_AR_10m/elev_clipped.tif
+  valid cells 22849 / 33231  (nodata 10382)
+  elev range 791.2 .. 1229.9 m
+
+&gt;&gt;&gt; [2] slope (GRASS r.slope.aspect)
+Default locale not found, using UTF-8
+Default locale settings are missing. GRASS running with C locale.Starting GRASS GIS...
+Creating new GRASS GIS location &lt;gslope_908810&gt;...
+Executing &lt;g.version&gt; ...
+GRASS 7.6.0 (2019)
+Execution of &lt;g.version&gt; finished.
+Cleaning up temporary files...
+Default locale not found, using UTF-8
+Default locale settings are missing. GRASS running with C locale.Starting GRASS GIS...
+Executing &lt;r.in.gdal input=/work/ys451/cct_demo/outputs_AR_10m/elev_clipped.tif output=elev_clipped --overwrite&gt; ...
+Importing raster map &lt;elev_clipped&gt;...  ... 100%
+Execution of &lt;r.in.gdal input=/work/ys451/cct_demo/outputs_AR_10m/elev_clipped.tif output=elev_clipped --overwrite&gt; finished.
+Cleaning up temporary files...
+Default locale not found, using UTF-8
+Default locale settings are missing. GRASS running with C locale.Starting GRASS GIS...
+Executing &lt;g.region raster=elev_clipped -p&gt; ...
+projection: 1 (UTM)
+zone:       17
+datum:      wgs84
+ellipsoid:  wgs84
+north:      3896820
+south:      3895230
+west:       269800
+east:       271890
+nsres:      10
+ewres:      10
+rows:       159
+cols:       209
+cells:      33231
+Execution of &lt;g.region raster=elev_clipped -p&gt; finished.
+Cleaning up temporary files...
+Default locale not found, using UTF-8
+Default locale settings are missing. GRASS running with C locale.Starting GRASS GIS...
+Executing &lt;r.slope.aspect elevation=elev_clipped slope=slope_raw format=degrees --overwrite&gt; ...  ... 100%
+Slope raster map &lt;slope_raw&gt; complete
+Execution of &lt;r.slope.aspect elevation=elev_clipped slope=slope_raw format=degrees --overwrite&gt; finished.
+Cleaning up temporary files...
+Default locale not found, using UTF-8
+Default locale settings are missing. GRASS running with C locale.Starting GRASS GIS...
+Executing &lt;r.out.gdal input=slope_raw output=/work/ys451/cct_demo/outputs_AR_10m/slope_raw.tif format=GTiff type=Float32 --overwrite&gt; ...
+ERROR 4: Unable to open EPSG support file gcs.csv.  Try setting the GDAL_DATA environment variable to point to the directory containing EPSG csv files.
+Checking GDAL data type and nodata value...  ... 100%
+Using GDAL data type &lt;Float32&gt;
+Input raster map contains cells with NULL-value (no-data). The value -nan
+will be used to represent no-data values in the input map. You can specify
+a nodata value with the nodata option.
+Exporting raster data to GTiff format...
+ERROR 6: SetColorTable() only supported for Byte or UInt16 bands in TIFF format.  ... 100%
+r.out.gdal complete. File
+&lt;/work/ys451/cct_demo/outputs_AR_10m/slope_raw.tif&gt; created.
+Execution of &lt;r.out.gdal input=slope_raw output=/work/ys451/cct_demo/outputs_AR_10m/slope_raw.tif format=GTiff type=Float32 --overwrite&gt; finished.
+Cleaning up temporary files...
+GRASS slope stage done -&gt; /work/ys451/cct_demo/outputs_AR_10m/slope_raw.tif
+
+&gt;&gt;&gt; [2] slope (CRS stamp + fill + validate)
+[slope] stamping CRS on raw r.slope.aspect output
+  CRS after stamp: EPSG:32617
+[slope] conditioning with slope_fill (fill NoData by neighbour mean)
+/hpc/group/abmurraylab/ys451/envs/dhsvm_geo/lib/python3.10/site-packages/osgeo/gdal.py:311: FutureWarning: Neither gdal.UseExceptions() nor gdal.DontUseExceptions() has been explicitly called. In GDAL 4.0, exceptions will be enabled by default.
+  warnings.warn(
+  [slope_fill] filled 778 missing-slope cells (of 778); 0 unfilled. filled slope mean 22.38 deg -&gt; /work/ys451/cct_demo/outputs_AR_10m/slope_filled.tif
+  fill stats: {&#x27;missing&#x27;: 778, &#x27;filled&#x27;: 778, &#x27;unfilled&#x27;: 0}
+
+[slope] comparing against qgis_CA reference
+OUT: /work/ys451/cct_demo/outputs_AR_10m/slope_filled.tif
+REF: /hpc/group/abmurraylab/ys451/dhsvm_ca/qgis_CA_ref/stream_slope_filled.tif
+  byte-identical: False
+    sha256 out: 9aedab5d401175fa90c8197bf97bb9af229171f5ee844ea34270637f255d60d8
+    sha256 ref: 9f9e1f9286738ea96168ec5e82fea97050ab02e3ee4d69cc0b4eacbc97e9f05c
+  shape   out/ref: (159, 209) / (74, 82)
+  dtype   out/ref: float32 / float32
+  nodata  out/ref: nan / nan
+  crs     out/ref: EPSG:32617 / EPSG:32617
+  transform match: False
+    out: (10.0, 0.0, 269800.0, 0.0, -10.0, 3896820.0)
+    ref: (28.15774, 0.0, 266591.467943, 0.0, -28.15774, 3896422.408824)
+  -&gt; shape differs; cannot do per-pixel comparison
+
+SLOPE MATCH (atol=0): False
+
+[slope] tolerance sweep (same r.slope.aspect both sides, so
+        differences should be ~floating-point, not structural):
+OUT: /work/ys451/cct_demo/outputs_AR_10m/slope_filled.tif
+REF: /hpc/group/abmurraylab/ys451/dhsvm_ca/qgis_CA_ref/stream_slope_filled.tif
+  byte-identical: False
+    sha256 out: 9aedab5d401175fa90c8197bf97bb9af229171f5ee844ea34270637f255d60d8
+    sha256 ref: 9f9e1f9286738ea96168ec5e82fea97050ab02e3ee4d69cc0b4eacbc97e9f05c
+  shape   out/ref: (159, 209) / (74, 82)
+  dtype   out/ref: float32 / float32
+  nodata  out/ref: nan / nan
+  crs     out/ref: EPSG:32617 / EPSG:32617
+  transform match: False
+    out: (10.0, 0.0, 269800.0, 0.0, -10.0, 3896820.0)
+    ref: (28.15774, 0.0, 266591.467943, 0.0, -28.15774, 3896422.408824)
+  -&gt; shape differs; cannot do per-pixel comparison
+  atol=1e-06: MATCH=False
+
+OUT: /work/ys451/cct_demo/outputs_AR_10m/slope_filled.tif
+REF: /hpc/group/abmurraylab/ys451/dhsvm_ca/qgis_CA_ref/stream_slope_filled.tif
+  byte-identical: False
+    sha256 out: 9aedab5d401175fa90c8197bf97bb9af229171f5ee844ea34270637f255d60d8
+    sha256 ref: 9f9e1f9286738ea96168ec5e82fea97050ab02e3ee4d69cc0b4eacbc97e9f05c
+  shape   out/ref: (159, 209) / (74, 82)
+  dtype   out/ref: float32 / float32
+  nodata  out/ref: nan / nan
+  crs     out/ref: EPSG:32617 / EPSG:32617
+  transform match: False
+    out: (10.0, 0.0, 269800.0, 0.0, -10.0, 3896820.0)
+    ref: (28.15774, 0.0, 266591.467943, 0.0, -28.15774, 3896422.408824)
+  -&gt; shape differs; cannot do per-pixel comparison
+  atol=0.0001: MATCH=False
+
+OUT: /work/ys451/cct_demo/outputs_AR_10m/slope_filled.tif
+REF: /hpc/group/abmurraylab/ys451/dhsvm_ca/qgis_CA_ref/stream_slope_filled.tif
+  byte-identical: False
+    sha256 out: 9aedab5d401175fa90c8197bf97bb9af229171f5ee844ea34270637f255d60d8
+    sha256 ref: 9f9e1f9286738ea96168ec5e82fea97050ab02e3ee4d69cc0b4eacbc97e9f05c
+  shape   out/ref: (159, 209) / (74, 82)
+  dtype   out/ref: float32 / float32
+  nodata  out/ref: nan / nan
+  crs     out/ref: EPSG:32617 / EPSG:32617
+  transform match: False
+    out: (10.0, 0.0, 269800.0, 0.0, -10.0, 3896820.0)
+    ref: (28.15774, 0.0, 266591.467943, 0.0, -28.15774, 3896422.408824)
+  -&gt; shape differs; cannot do per-pixel comparison
+  atol=0.01: MATCH=False
+
+OUT: /work/ys451/cct_demo/outputs_AR_10m/slope_filled.tif
+REF: /hpc/group/abmurraylab/ys451/dhsvm_ca/qgis_CA_ref/stream_slope_filled.tif
+  byte-identical: False
+    sha256 out: 9aedab5d401175fa90c8197bf97bb9af229171f5ee844ea34270637f255d60d8
+    sha256 ref: 9f9e1f9286738ea96168ec5e82fea97050ab02e3ee4d69cc0b4eacbc97e9f05c
+  shape   out/ref: (159, 209) / (74, 82)
+  dtype   out/ref: float32 / float32
+  nodata  out/ref: nan / nan
+  crs     out/ref: EPSG:32617 / EPSG:32617
+  transform match: False
+    out: (10.0, 0.0, 269800.0, 0.0, -10.0, 3896820.0)
+    ref: (28.15774, 0.0, 266591.467943, 0.0, -28.15774, 3896422.408824)
+  -&gt; shape differs; cannot do per-pixel comparison
+  atol=0.1: MATCH=False
+
+OUT: /work/ys451/cct_demo/outputs_AR_10m/slope_filled.tif
+REF: /hpc/group/abmurraylab/ys451/dhsvm_ca/qgis_CA_ref/stream_slope_filled.tif
+  byte-identical: False
+    sha256 out: 9aedab5d401175fa90c8197bf97bb9af229171f5ee844ea34270637f255d60d8
+    sha256 ref: 9f9e1f9286738ea96168ec5e82fea97050ab02e3ee4d69cc0b4eacbc97e9f05c
+  shape   out/ref: (159, 209) / (74, 82)
+  dtype   out/ref: float32 / float32
+  nodata  out/ref: nan / nan
+  crs     out/ref: EPSG:32617 / EPSG:32617
+  transform match: False
+    out: (10.0, 0.0, 269800.0, 0.0, -10.0, 3896820.0)
+    ref: (28.15774, 0.0, 266591.467943, 0.0, -28.15774, 3896422.408824)
+  -&gt; shape differs; cannot do per-pixel comparison
+  atol=0.5: MATCH=False
+
+
+&gt;&gt;&gt; [3] base-map binaries
+[bins] reading /work/ys451/cct_demo/outputs_AR_10m/elev_clipped.tif
+/hpc/group/abmurraylab/ys451/envs/dhsvm_geo/lib/python3.10/site-packages/osgeo/gdal.py:311: FutureWarning: Neither gdal.UseExceptions() nor gdal.DontUseExceptions() has been explicitly called. In GDAL 4.0, exceptions will be enabled by default.
+  warnings.warn(
+[bins] valid pixels: 22849 / 33231
+[bins] wrote dem/mask/soil/veg .bin
+[bins] wrote soildepth_uniform_2.0m.bin
+[bins] wrote soildepth_uniform_2.5m.bin
+[bins] wrote soildepth_uniform_3.0m.bin
+[bins] wrote soildepth_uniform_3.5m.bin
+[bins] wrote soildepth_uniform_4.0m.bin
+
+&gt;&gt;&gt; [4] hydrology (GRASS chain + CRS stamp)
+
+=======================================================
+  DHSVM HYDROLOGY CORE (standalone)
+=======================================================
+[step] GRASS hydrology chain (r.watershed -&gt; r.stream.extract -&gt; r.to.vect)
+       DEM=elev_clipped.tif  out=/work/ys451/cct_demo/outputs_AR_10m
+       stream source area 22000.0 m2 / cell 100.00 m2 = 220 cells
+Default locale not found, using UTF-8
+Default locale settings are missing. GRASS running with C locale.Starting GRASS GIS...
+Creating new GRASS GIS location &lt;ghydro_909007&gt;...
+Executing &lt;bash -s&gt; ...
+ERROR 4: Unable to open EPSG support file gcs.csv.  Try setting the GDAL_DATA environment variable to point to the directory containing EPSG csv files.
+ERROR 6: SetColorTable() only supported for Byte or UInt16 bands in TIFF format.
+ERROR 4: Unable to open EPSG support file gcs.csv.  Try setting the GDAL_DATA environment variable to point to the directory containing EPSG csv files.
+ERROR 6: SetColorTable() only supported for Byte or UInt16 bands in TIFF format.
+ERROR 4: Unable to open EPSG support file gcs.csv.  Try setting the GDAL_DATA environment variable to point to the directory containing EPSG csv files.
+ERROR 4: Unable to open EPSG support file gcs.csv.  Try setting the GDAL_DATA environment variable to point to the directory containing EPSG csv files.
+Execution of &lt;bash -s&gt; finished.
+Cleaning up default sqlite database ...
+Cleaning up temporary files...
+[ok] GRASS hydrology chain done. Exports in /work/ys451/cct_demo/outputs_AR_10m
+     (CRS stamping of the GeoTIFFs is handled by hydrology.py)
+  -&gt; stamped EPSG:32617 on flow_acc.tif
+  -&gt; stamped EPSG:32617 on flow_dir.tif
+  -&gt; stamped EPSG:32617 on stream_raster.tif
+=======================================================
+
+
+&gt;&gt;&gt; [5] soil depth
+
+--- Dynamic Soil Depth Module (standalone) ---
+  [soildepth] Reading spatial inputs into memory...
+/hpc/group/abmurraylab/ys451/envs/dhsvm_geo/lib/python3.10/site-packages/osgeo/gdal.py:311: FutureWarning: Neither gdal.UseExceptions() nor gdal.DontUseExceptions() has been explicitly called. In GDAL 4.0, exceptions will be enabled by default.
+  warnings.warn(
+  [soildepth] Aligning boundaries and sanitizing edge pixels...
+  [soildepth] Computing weighted topographic functions...
+  [soildepth] Writing flat binary -&gt; soildepth.bin
+  [soildepth] Writing GeoTIFF -&gt; soildepth.tif
+  [soildepth] Complete.
+
+&gt;&gt;&gt; [6] vector attributes
+[vector_attrs] read 67 features from streamfile.shp
+/hpc/group/abmurraylab/ys451/envs/dhsvm_geo/lib/python3.10/site-packages/osgeo/gdal.py:311: FutureWarning: Neither gdal.UseExceptions() nor gdal.DontUseExceptions() has been explicitly called. In GDAL 4.0, exceptions will be enabled by default.
+  warnings.warn(
+/hpc/group/abmurraylab/ys451/envs/dhsvm_geo/lib/python3.10/site-packages/pyogrio/geopandas.py:710: UserWarning: &#x27;crs&#x27; was not provided.  The output dataset will not have projection information defined and may not be usable in other systems.
+  write(
+[vector_attrs] wrote streamfile_attr.shp with attrs: arcid, Shape_Leng, Row, Col, slope_deg, meanmsq
+  slope_deg range: 4.634..25.632
+  meanmsq   range: 100.0..100.0
+
+&gt;&gt;&gt; [6] channel class + chanclass write-back
+stream.class.dat written: /work/ys451/cct_demo/outputs_AR_10m/DHSVM_input_streams/stream.class.dat
+Class counts: {7: 4, 13: 63}
+[info] Slope mode auto-detected as: deg (converted to tan for binning)
+/hpc/group/abmurraylab/ys451/envs/dhsvm_geo/lib/python3.10/site-packages/pyogrio/geopandas.py:710: UserWarning: &#x27;crs&#x27; was not provided.  The output dataset will not have projection information defined and may not be usable in other systems.
+  write(
+[info] wrote per-segment chanclass/Class/hydwidth/hyddepth back to streamfile_attr.shp
+
+&gt;&gt;&gt; [6] stream network + map
+[stream_network] read 67 features
+/hpc/group/abmurraylab/ys451/envs/dhsvm_geo/lib/python3.10/site-packages/osgeo/gdal.py:311: FutureWarning: Neither gdal.UseExceptions() nor gdal.DontUseExceptions() has been explicitly called. In GDAL 4.0, exceptions will be enabled by default.
+  warnings.warn(
+[stream_network] segments=67  outlets=1  max_propagated_order=8
+[stream_network] wrote stream.network.dat
+[stream_network] wrote stream.map.dat
+
+&gt;&gt;&gt; [7] initial states (grid + channel)
+
+=======================================================
+  DHSVM STATE INITIALIZER (standalone)
+=======================================================
+/hpc/group/abmurraylab/ys451/envs/dhsvm_geo/lib/python3.10/site-packages/osgeo/gdal.py:311: FutureWarning: Neither gdal.UseExceptions() nor gdal.DontUseExceptions() has been explicitly called. In GDAL 4.0, exceptions will be enabled by default.
+  warnings.warn(
+
+[step] grid states for 01.01.2016.00.00.00 (NY=159, NX=209)
+  -&gt; Interception.State.01.01.2016.00.00.00.bin
+  -&gt; Snow.State.01.01.2016.00.00.00.bin
+  -&gt; Soil.State.01.01.2016.00.00.00.bin
+[step] channel state -&gt; Channel.State.01.01.2016.00.00.00
+=======================================================
+
+
+==========================================================
+  PIPELINE COMPLETE -- DHSVM input set:
+==========================================================
+[grid binaries]  /work/ys451/cct_demo/outputs_AR_10m/DHSVM_input_binaries
+    dem.bin
+    mask.bin
+    soil.bin
+    soildepth.bin
+    soildepth_uniform_2.0m.bin
+    soildepth_uniform_2.5m.bin
+    soildepth_uniform_3.0m.bin
+    soildepth_uniform_3.5m.bin
+    soildepth_uniform_4.0m.bin
+    veg.bin
+[stream files]   /work/ys451/cct_demo/outputs_AR_10m/DHSVM_input_streams
+    stream.class.dat
+    stream.map.dat
+    stream.network.dat
+[model state]    /work/ys451/cct_demo/outputs_AR_10m/modelstate
+    Channel.State.01.01.2016.00.00.00
+    Interception.State.01.01.2016.00.00.00.bin
+    Snow.State.01.01.2016.00.00.00.bin
+    Soil.State.01.01.2016.00.00.00.bin
+==========================================================
+(dhsvm_geo) ys451@dcc-login-05  /work/ys451/cct_demo/DHSVM_Stream_Toolkit_ThatWorks $ python3 standalone_CA/diagn
+nostics/quicklook.py --run-dir &quot;$DHSVM_OUT&quot; --boundary &quot;$DHSVM_WATERSHED&quot; --out &quot;$DHSVM_OUT/quicklook.png&quot; --titl
+le &quot;AR 10 m, DCC demo&quot;
+(dhsvm_geo) ys451@dcc-login-05  /work/ys451/cct_demo/DHSVM_Stream_Toolkit_ThatWorks $ python3 standalone_CA/diagnostics/quicklook.py --run-dir &quot;$DHSVM_OUT&quot; --boundary &quot;$DHSVM_WATERSHED&quot; --out &quot;$DHSVM_OUT/quicklook.png&quot; --title &quot;AR 10 m, DCC demo&quot;
+
+wrote /work/ys451/cct_demo/outputs_AR_10m/quicklook.png  (300 dpi)
+(dhsvm_geo) ys451@dcc-login-05  /work/ys451/cct_demo/DHSVM_Stream_Toolkit_ThatWorks $ ls -R &quot;$DHSVM_OUT&quot; | head -
+-40
+(dhsvm_geo) ys451@dcc-login-05  /work/ys451/cct_demo/DHSVM_Stream_Toolkit_ThatWorks $ ls -R &quot;$DHSVM_OUT&quot; | head -40
+
+/work/ys451/cct_demo/outputs_AR_10m:
+DHSVM_input_binaries
+DHSVM_input_streams
+elev_clipped.tif
+flow_acc.tif
+flow_dir.tif
+modelstate
+quicklook.png
+slope_filled.tif
+slope_raw.tif
+soildepth.tif
+stream_raster.tif
+streamfile.dbf
+streamfile.prj
+streamfile.shp
+streamfile.shx
+streamfile_attr.cpg
+streamfile_attr.dbf
+streamfile_attr.shp
+streamfile_attr.shx
+
+/work/ys451/cct_demo/outputs_AR_10m/DHSVM_input_binaries:
+dem.bin
+mask.bin
+soil.bin
+soildepth.bin
+soildepth_uniform_2.0m.bin
+soildepth_uniform_2.5m.bin
+soildepth_uniform_3.0m.bin
+soildepth_uniform_3.5m.bin
+soildepth_uniform_4.0m.bin
+veg.bin
+
+/work/ys451/cct_demo/outputs_AR_10m/DHSVM_input_streams:
+stream.class.dat
+stream.map.dat
+stream.network.dat
+
+/work/ys451/cct_demo/outputs_AR_10m/modelstate:
+Channel.State.01.01.2016.00.00.00
+(dhsvm_geo) ys451@dcc-login-05  /work/ys451/cct_demo/DHSVM_Stream_Toolkit_ThatWorks $ exitexit
+
+exit</code></pre>
+</div>
+```
+
+[Recorded with script on dcc-login-05, August 16. Scroll inside the box.]{.muted style="font-size:0.5em; display:block; text-align:center; margin-top:6px;"}
+
+::: notes
+Backup for questions. The complete recorded session of the fresh run: clean output directory, general DEM entry, every stage, PIPELINE COMPLETE, and the quick-look. Scroll with the mouse wheel inside the box.
+:::
